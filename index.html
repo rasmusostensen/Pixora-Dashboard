@@ -317,7 +317,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <button class="btn btn-primary" onclick="openModal('faktura')">+ Ny faktura</button>
       </div>
       <table>
-        <thead><tr><th>Nr.</th><th>Kunde</th><th>Beskrivelse</th><th>Belop</th><th>Forfall</th><th>Status</th></tr></thead>
+        <thead><tr><th>Nr.</th><th>Kunde</th><th>Beskrivelse</th><th>Beløp</th><th>Forfall</th><th>Status</th></tr></thead>
         <tbody id="faktura-tabell">
           <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Ingen fakturaer enda</td></tr>
         </tbody>
@@ -408,7 +408,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     </div>
     <div class="form-group"><label class="form-label">Beskrivelse</label><input class="form-input" id="fak-desc" placeholder="f.eks. Profesjonell nettside"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Belop (kr)</label><input class="form-input" id="fak-belop" type="number" placeholder="5000"></div>
+      <div class="form-group"><label class="form-label">Beløp (kr)</label><input class="form-input" id="fak-beløp" type="number" placeholder="5000"></div>
       <div class="form-group"><label class="form-label">Forfallsdato</label><input class="form-input" id="fak-forfall" type="date"></div>
     </div>
     <div class="modal-actions">
@@ -549,7 +549,7 @@ function leggTilFaktura() {
   const nr = document.getElementById('fak-nr').value.trim();
   const kunde = document.getElementById('fak-kunde').value.trim();
   const desc = document.getElementById('fak-desc').value.trim();
-  const beløp = parseInt(document.getElementById('fak-belop').value) || 0;
+  const beløp = parseInt(document.getElementById('fak-beløp').value) || 0;
   const forfall = document.getElementById('fak-forfall').value;
   if (!nr || !kunde) return;
   fakturaer.push({ nr, kunde, desc, beløp , forfall, betalt: false });
@@ -573,7 +573,7 @@ function oppdaterFakturaTabell() {
       <td style="font-weight:600">${f.nr}</td>
       <td>${f.kunde}</td>
       <td style="color:var(--muted)">${f.desc}</td>
-      <td style="font-weight:600">${f.belop.toLocaleString('no-NO')} kr</td>
+      <td style="font-weight:600">${f.beløp.toLocaleString('no-NO')} kr</td>
       <td>${f.forfall ? new Date(f.forfall).toLocaleDateString('no-NO') : '—'}</td>
       <td>
         <span class="badge ${f.betalt ? 'badge-green' : 'badge-yellow'}" style="cursor:pointer" onclick="toggleBetalt(${i})">
@@ -582,8 +582,8 @@ function oppdaterFakturaTabell() {
       </td>
     </tr>`).join('');
 
-  const totalt = fakturaer.reduce((s, f) => s + f.belop, 0);
-  const betalt = fakturaer.filter(f => f.betalt).reduce((s, f) => s + f.belop, 0);
+  const totalt = fakturaer.reduce((s, f) => s + f.beløp, 0);
+  const betalt = fakturaer.filter(f => f.betalt).reduce((s, f) => s + f.beløp, 0);
   document.getElementById('f-totalt').textContent = totalt.toLocaleString('no-NO') + ' kr';
   document.getElementById('f-betalt').textContent = betalt.toLocaleString('no-NO') + ' kr';
   document.getElementById('f-utestaaende').textContent = (totalt - betalt).toLocaleString('no-NO') + ' kr';
