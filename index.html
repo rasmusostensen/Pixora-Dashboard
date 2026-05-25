@@ -197,7 +197,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="page-header">
-      <div class="page-title">God dag, Rasmus</div>
+      <div class="page-title">God dag, Rasmus, Aksel, Arne</div>
       <div class="page-sub">Her er en oversikt over Pixora i dag</div>
     </div>
 
@@ -215,7 +215,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <div class="stat-card">
         <div class="stat-label">Ubetalte fakturaer</div>
         <div class="stat-value" style="color:#f0c04a" id="stat-ubetalt">0</div>
-        <div class="stat-change">Venter pa betaling</div>
+        <div class="stat-change">Venter på betaling</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Aktive prosjekter</div>
@@ -251,7 +251,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <table>
         <thead><tr><th>Bedrift</th><th>Pakke</th><th>Vedlikehold</th><th>Status</th><th>Neste faktura</th></tr></thead>
         <tbody id="kunde-tabell">
-          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen kunder enda — trykk "Ny kunde" for a legge til</td></tr>
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen kunder enda — trykk "Ny kunde" for å legge til</td></tr>
         </tbody>
       </table>
     </div>
@@ -307,7 +307,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <div class="info-card">
         <div class="info-label">Vipps-informasjon</div>
         <div class="info-row"><span class="info-row-label">Nummer</span><span class="info-row-value">465 12 634</span></div>
-        <div class="info-row"><span class="info-row-label">Navn</span><span class="info-row-value">Rasmus Hansen Ostensen</span></div>
+        <div class="info-row"><span class="info-row-label">Navn</span><span class="info-row-value">Rasmus Hansen Østensen</span></div>
         <div class="info-row"><span class="info-row-label">Betalingsfrist</span><span class="info-row-value">14 dager</span></div>
       </div>
     </div>
@@ -338,7 +338,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <table>
         <thead><tr><th>Bedrift</th><th>Kontaktperson</th><th>Ansvarlig</th><th>Status</th><th>Notat</th></tr></thead>
         <tbody id="lead-tabell">
-          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen leads enda — trykk "Ny lead" for a legge til</td></tr>
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen leads enda — trykk "Ny lead" for å legge til</td></tr>
         </tbody>
       </table>
     </div>
@@ -549,10 +549,10 @@ function leggTilFaktura() {
   const nr = document.getElementById('fak-nr').value.trim();
   const kunde = document.getElementById('fak-kunde').value.trim();
   const desc = document.getElementById('fak-desc').value.trim();
-  const belop = parseInt(document.getElementById('fak-belop').value) || 0;
+  const beløp = parseInt(document.getElementById('fak-belop').value) || 0;
   const forfall = document.getElementById('fak-forfall').value;
   if (!nr || !kunde) return;
-  fakturaer.push({ nr, kunde, desc, belop, forfall, betalt: false });
+  fakturaer.push({ nr, kunde, desc, beløp , forfall, betalt: false });
   oppdaterFakturaTabell();
   oppdaterDashboard();
   closeAllModals();
