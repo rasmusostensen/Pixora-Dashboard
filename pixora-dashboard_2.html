@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pixora — Internt Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f0f14;
+  --surface: #17171f;
+  --surface2: #1e1e28;
+  --border: #2a2a38;
+  --accent: #6c47ff;
+  --accent2: #ff6b6b;
+  --gold: #f0c04a;
+  --green: #3ecf8e;
+  --text: #e8e8f0;
+  --muted: #6b6b85;
+  --dim: #3a3a50;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px; min-height: 100vh; background: var(--surface);
+  border-right: 1px solid var(--border); padding: 24px 0;
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+}
+.sidebar-logo {
+  padding: 0 20px 24px; border-bottom: 1px solid var(--border);
+  font-family: 'DM Serif Display', serif; font-size: 1.4rem;
+}
+.sidebar-logo span { color: var(--accent); }
+.sidebar-section { padding: 20px 12px 8px; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 20px; font-size: 0.875rem; color: var(--muted);
+  cursor: pointer; border-radius: 6px; margin: 1px 8px;
+  transition: all 0.15s; border: none; background: none; width: calc(100% - 16px); text-align: left;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: rgba(108,71,255,0.15); color: var(--accent); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+
+/* MAIN */
+.main { margin-left: 240px; flex: 1; padding: 40px 48px; min-height: 100vh; }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* HEADER */
+.page-header { margin-bottom: 36px; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: 6px; }
+.page-sub { color: var(--muted); font-size: 0.9rem; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 36px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+}
+.stat-label { font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.stat-value { font-size: 1.8rem; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+.stat-change { font-size: 0.75rem; color: var(--green); }
+
+/* TABLE */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 28px; }
+.table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.table-title { font-size: 0.9rem; font-weight: 600; }
+.btn { padding: 7px 16px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th { padding: 10px 20px; text-align: left; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+td { padding: 13px 20px; border-bottom: 1px solid rgba(42,42,56,0.6); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 100px; font-size: 0.72rem; font-weight: 600; }
+.badge-green { background: rgba(62,207,142,0.12); color: var(--green); }
+.badge-yellow { background: rgba(240,192,74,0.12); color: var(--gold); }
+.badge-red { background: rgba(255,107,107,0.12); color: var(--accent2); }
+.badge-purple { background: rgba(108,71,255,0.12); color: var(--accent); }
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* KANBAN */
+.kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.kanban-col { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.kanban-col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.kanban-col-title { font-size: 0.82rem; font-weight: 600; }
+.kanban-count { background: var(--surface2); color: var(--muted); border-radius: 100px; padding: 2px 8px; font-size: 0.72rem; }
+.kanban-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s; }
+.kanban-card:hover { border-color: var(--accent); }
+.kanban-card-title { font-size: 0.85rem; font-weight: 500; margin-bottom: 6px; }
+.kanban-card-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; }
+.kanban-card-meta { display: flex; justify-content: space-between; align-items: center; }
+
+/* FAKTURA */
+.faktura-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+.info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.info-label { font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.info-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.info-row:last-child { border-bottom: none; }
+.info-row-label { color: var(--muted); }
+.info-row-value { font-weight: 500; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 480px; }
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 1.4rem; margin-bottom: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; display: block; }
+.form-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 0.875rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s; }
+.form-input:focus { border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 4px; width: fit-content; }
+.tab { padding: 7px 16px; border-radius: 6px; font-size: 0.82rem; font-weight: 500; cursor: pointer; color: var(--muted); transition: all 0.15s; border: none; background: none; font-family: 'DM Sans', sans-serif; }
+.tab.active { background: var(--accent); color: white; }
+
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .main { padding: 24px; }
+}
+
+/* CUSTOM SELECT */
+.custom-select { position: relative; width: 100%; }
+.cs-selected {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; color: var(--text); font-size: 0.875rem; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: border-color 0.15s; user-select: none;
+}
+.cs-selected:hover { border-color: var(--accent); }
+.custom-select.open .cs-selected { border-color: var(--accent); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.cs-arrow { font-size: 1rem; color: var(--muted); transition: transform 0.2s; }
+.custom-select.open .cs-arrow { transform: rotate(180deg); }
+.cs-options {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+  background: var(--surface2); border: 1px solid var(--accent);
+  border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
+  overflow: hidden; display: none;
+}
+.custom-select.open .cs-options { display: block; }
+.cs-option {
+  padding: 10px 14px; font-size: 0.875rem; cursor: pointer; color: var(--muted);
+  transition: background 0.12s, color 0.12s;
+}
+.cs-option:hover { background: rgba(108,71,255,0.12); color: var(--text); }
+.cs-option.active { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">Pix<span>ora</span></div>
+
+  <div class="sidebar-section">Oversikt</div>
+  <button class="nav-item active" onclick="showPage('dashboard', this)">
+    <div class="nav-dot" style="background:#6c47ff"></div> Dashboard
+  </button>
+
+  <div class="sidebar-section">Drift</div>
+  <button class="nav-item" onclick="showPage('kunder', this)">
+    <div class="nav-dot" style="background:#3ecf8e"></div> Kunder
+  </button>
+  <button class="nav-item" onclick="showPage('prosjekter', this)">
+    <div class="nav-dot" style="background:#f0c04a"></div> Prosjekter
+  </button>
+  <button class="nav-item" onclick="showPage('faktura', this)">
+    <div class="nav-dot" style="background:#ff6b6b"></div> Fakturaer
+  </button>
+
+  <div class="sidebar-section">Team</div>
+  <button class="nav-item" onclick="showPage('leads', this)">
+    <div class="nav-dot" style="background:#60a5fa"></div> Leads
+  </button>
+
+  <div class="sidebar-bottom">
+    pixorawebdesigns@gmail.com
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title">God dag, Rasmus</div>
+      <div class="page-sub">Her er en oversikt over Pixora i dag</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Aktive kunder</div>
+        <div class="stat-value" style="color:#3ecf8e" id="stat-kunder">0</div>
+        <div class="stat-change">Totalt denne måneden</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Månedlig vedlikehold</div>
+        <div class="stat-value" style="color:#6c47ff" id="stat-vedlikehold">0 kr</div>
+        <div class="stat-change">Fast inntekt</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Ubetalte fakturaer</div>
+        <div class="stat-value" style="color:#f0c04a" id="stat-ubetalt">0</div>
+        <div class="stat-change">Venter pa betaling</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Aktive prosjekter</div>
+        <div class="stat-value" style="color:#ff6b6b" id="stat-prosjekter">0</div>
+        <div class="stat-change">Under arbeid</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Siste aktivitet</div>
+      </div>
+      <table>
+        <thead><tr><th>Hendelse</th><th>Kunde</th><th>Dato</th><th>Status</th></tr></thead>
+        <tbody id="aktivitet-tabell">
+          <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:32px">Ingen aktivitet enda — legg til kunder for å komme i gang</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- KUNDER -->
+  <div class="page" id="page-kunder">
+    <div class="page-header">
+      <div class="page-title">Kunder</div>
+      <div class="page-sub">Oversikt over alle aktive kunder og vedlikeholdsavtaler</div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Alle kunder</div>
+        <button class="btn btn-primary" onclick="openModal('kunde')">+ Ny kunde</button>
+      </div>
+      <table>
+        <thead><tr><th>Bedrift</th><th>Pakke</th><th>Vedlikehold</th><th>Status</th><th>Neste faktura</th></tr></thead>
+        <tbody id="kunde-tabell">
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen kunder enda — trykk "Ny kunde" for a legge til</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PROSJEKTER -->
+  <div class="page" id="page-prosjekter">
+    <div class="page-header">
+      <div class="page-title">Prosjekter</div>
+      <div class="page-sub">Nettsider under arbeid</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="openModal('prosjekt')">+ Nytt prosjekt</button>
+    </div>
+    <div class="kanban">
+      <div class="kanban-col">
+        <div class="kanban-col-header">
+          <div class="kanban-col-title">Ikke startet</div>
+          <div class="kanban-count" id="count-0">0</div>
+        </div>
+        <div id="col-0"><p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Ingen prosjekter</p></div>
+      </div>
+      <div class="kanban-col">
+        <div class="kanban-col-header">
+          <div class="kanban-col-title">Under arbeid</div>
+          <div class="kanban-count" id="count-1">0</div>
+        </div>
+        <div id="col-1"><p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Ingen prosjekter</p></div>
+      </div>
+      <div class="kanban-col">
+        <div class="kanban-col-header">
+          <div class="kanban-col-title">Ferdig</div>
+          <div class="kanban-count" id="count-2">0</div>
+        </div>
+        <div id="col-2"><p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Ingen prosjekter</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAKTURAER -->
+  <div class="page" id="page-faktura">
+    <div class="page-header">
+      <div class="page-title">Fakturaer</div>
+      <div class="page-sub">Hold oversikt over betalinger</div>
+    </div>
+    <div class="faktura-grid">
+      <div class="info-card">
+        <div class="info-label">Betalingsoversikt</div>
+        <div class="info-row"><span class="info-row-label">Totalt sendt</span><span class="info-row-value" id="f-totalt">0 kr</span></div>
+        <div class="info-row"><span class="info-row-label">Betalt</span><span class="info-row-value" style="color:var(--green)" id="f-betalt">0 kr</span></div>
+        <div class="info-row"><span class="info-row-label">Utestående</span><span class="info-row-value" style="color:var(--gold)" id="f-utestaaende">0 kr</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Vipps-informasjon</div>
+        <div class="info-row"><span class="info-row-label">Nummer</span><span class="info-row-value">465 12 634</span></div>
+        <div class="info-row"><span class="info-row-label">Navn</span><span class="info-row-value">Rasmus Hansen Ostensen</span></div>
+        <div class="info-row"><span class="info-row-label">Betalingsfrist</span><span class="info-row-value">14 dager</span></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <div class="table-title">Alle fakturaer</div>
+        <button class="btn btn-primary" onclick="openModal('faktura')">+ Ny faktura</button>
+      </div>
+      <table>
+        <thead><tr><th>Nr.</th><th>Kunde</th><th>Beskrivelse</th><th>Belop</th><th>Forfall</th><th>Status</th></tr></thead>
+        <tbody id="faktura-tabell">
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Ingen fakturaer enda</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEADS -->
+  <div class="page" id="page-leads">
+    <div class="page-header">
+      <div class="page-title">Leads</div>
+      <div class="page-sub">Potensielle kunder Arne pitcher til</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button class="btn btn-primary" onclick="openModal('lead')">+ Ny lead</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Bedrift</th><th>Kontaktperson</th><th>Ansvarlig</th><th>Status</th><th>Notat</th></tr></thead>
+        <tbody id="lead-tabell">
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen leads enda — trykk "Ny lead" for a legge til</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODALER -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+
+  <!-- Kunde modal -->
+  <div class="modal" id="modal-kunde" style="display:none">
+    <div class="modal-title">Ny kunde</div>
+    <div class="form-group"><label class="form-label">Bedriftsnavn</label><input class="form-input" id="k-navn" placeholder="f.eks. Hole Gardsutsalg"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Pakke</label>
+        <div class="custom-select" id="k-pakke-wrap">
+          <div class="cs-selected" onclick="toggleSelect('k-pakke-wrap')">Profesjonell - 8 000 kr <span class="cs-arrow">&#8964;</span></div>
+          <div class="cs-options">
+            <div class="cs-option" onclick="selectOption('k-pakke-wrap','Basis - 5 000 kr')">Basis - 5 000 kr</div>
+            <div class="cs-option active" onclick="selectOption('k-pakke-wrap','Profesjonell - 8 000 kr')">Profesjonell - 8 000 kr</div>
+            <div class="cs-option" onclick="selectOption('k-pakke-wrap','Nettbutikk - 12 000 kr')">Nettbutikk - 12 000 kr</div>
+          </div>
+          <input type="hidden" id="k-pakke" value="Profesjonell - 8 000 kr">
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Vedlikehold/mnd</label><input class="form-input" id="k-vedlikehold" placeholder="800" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">E-post</label><input class="form-input" id="k-epost" placeholder="kontakt@bedrift.no"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAllModals()">Avbryt</button>
+      <button class="btn btn-primary" onclick="leggTilKunde()">Legg til kunde</button>
+    </div>
+  </div>
+
+  <!-- Prosjekt modal -->
+  <div class="modal" id="modal-prosjekt" style="display:none">
+    <div class="modal-title">Nytt prosjekt</div>
+    <div class="form-group"><label class="form-label">Prosjektnavn</label><input class="form-input" id="p-navn" placeholder="f.eks. Nettside for Hole Gardsutsalg"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Kunde</label><input class="form-input" id="p-kunde" placeholder="Kundenavn"></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="p-status">
+          <option value="0">Ikke startet</option>
+          <option value="1">Under arbeid</option>
+          <option value="2">Ferdig</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Ansvarlig</label>
+      <select class="form-input" id="p-ansvarlig">
+        <option>Rasmus</option><option>Aksel</option><option>Arne</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAllModals()">Avbryt</button>
+      <button class="btn btn-primary" onclick="leggTilProsjekt()">Legg til</button>
+    </div>
+  </div>
+
+  <!-- Faktura modal -->
+  <div class="modal" id="modal-faktura" style="display:none">
+    <div class="modal-title">Ny faktura</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fakturanummer</label><input class="form-input" id="fak-nr" placeholder="2026-001"></div>
+      <div class="form-group"><label class="form-label">Kunde</label><input class="form-input" id="fak-kunde" placeholder="Kundenavn"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Beskrivelse</label><input class="form-input" id="fak-desc" placeholder="f.eks. Profesjonell nettside"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Belop (kr)</label><input class="form-input" id="fak-belop" type="number" placeholder="5000"></div>
+      <div class="form-group"><label class="form-label">Forfallsdato</label><input class="form-input" id="fak-forfall" type="date"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAllModals()">Avbryt</button>
+      <button class="btn btn-primary" onclick="leggTilFaktura()">Legg til faktura</button>
+    </div>
+  </div>
+
+  <!-- Lead modal -->
+  <div class="modal" id="modal-lead" style="display:none">
+    <div class="modal-title">Ny lead</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Bedrift</label><input class="form-input" id="l-bedrift" placeholder="Bedriftsnavn"></div>
+      <div class="form-group"><label class="form-label">Kontaktperson</label><input class="form-input" id="l-kontakt" placeholder="Navn"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Ansvarlig</label>
+        <div class="custom-select" id="l-ansvarlig-wrap">
+          <div class="cs-selected" onclick="toggleSelect('l-ansvarlig-wrap')">Arne <span class="cs-arrow">&#8964;</span></div>
+          <div class="cs-options">
+            <div class="cs-option active" onclick="selectOption('l-ansvarlig-wrap','Arne')">Arne</div>
+            <div class="cs-option" onclick="selectOption('l-ansvarlig-wrap','Rasmus')">Rasmus</div>
+            <div class="cs-option" onclick="selectOption('l-ansvarlig-wrap','Aksel')">Aksel</div>
+          </div>
+          <input type="hidden" id="l-ansvarlig" value="Arne">
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="l-status">
+          <option>Ikke kontaktet</option><option>Kontaktet</option><option>Motet</option><option>Tilbud sendt</option><option>Vunnet</option><option>Tapt</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Notat</label><input class="form-input" id="l-notat" placeholder="Kort notat..."></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAllModals()">Avbryt</button>
+      <button class="btn btn-primary" onclick="leggTilLead()">Legg til lead</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// DATA
+let kunder = [], prosjekter = [], fakturaer = [], leads = [];
+
+// NAV
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+  oppdaterDashboard();
+}
+
+// MODAL
+function openModal(type) {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+  document.getElementById('modal-' + type).style.display = 'block';
+}
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeAllModals();
+}
+function closeAllModals() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+}
+
+// KUNDER
+function leggTilKunde() {
+  const navn = document.getElementById('k-navn').value.trim();
+  if (!navn) return;
+  const pakke = document.getElementById('k-pakke').value;
+  const vedlikehold = parseInt(document.getElementById('k-vedlikehold').value) || 800;
+  const epost = document.getElementById('k-epost').value.trim();
+  kunder.push({ navn, pakke, vedlikehold, epost, dato: new Date().toLocaleDateString('no-NO') });
+  oppdaterKundeTabell();
+  oppdaterDashboard();
+  closeAllModals();
+  document.getElementById('k-navn').value = '';
+  document.getElementById('k-epost').value = '';
+}
+function oppdaterKundeTabell() {
+  const t = document.getElementById('kunde-tabell');
+  if (kunder.length === 0) {
+    t.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen kunder enda</td></tr>';
+    return;
+  }
+  t.innerHTML = kunder.map(k => `
+    <tr>
+      <td><strong>${k.navn}</strong>${k.epost ? '<br><span style="color:var(--muted);font-size:0.75rem">'+k.epost+'</span>' : ''}</td>
+      <td><span class="badge badge-purple">${k.pakke.split(' - ')[0]}</span></td>
+      <td>${k.vedlikehold} kr/mnd</td>
+      <td><span class="badge badge-green"><span class="badge-dot"></span>Aktiv</span></td>
+      <td>${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString('no-NO')}</td>
+    </tr>`).join('');
+}
+
+// PROSJEKTER
+function leggTilProsjekt() {
+  const navn = document.getElementById('p-navn').value.trim();
+  if (!navn) return;
+  const kunde = document.getElementById('p-kunde').value.trim();
+  const status = parseInt(document.getElementById('p-status').value);
+  const ansvarlig = document.getElementById('p-ansvarlig').value;
+  prosjekter.push({ navn, kunde, status, ansvarlig });
+  oppdaterKanban();
+  oppdaterDashboard();
+  closeAllModals();
+  document.getElementById('p-navn').value = '';
+  document.getElementById('p-kunde').value = '';
+}
+function oppdaterKanban() {
+  const cols = [[], [], []];
+  prosjekter.forEach(p => cols[p.status].push(p));
+  const farger = ['var(--muted)', 'var(--gold)', 'var(--green)'];
+  cols.forEach((col, i) => {
+    document.getElementById('count-' + i).textContent = col.length;
+    const el = document.getElementById('col-' + i);
+    if (col.length === 0) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:0.8rem;text-align:center;padding:20px">Ingen prosjekter</p>';
+    } else {
+      el.innerHTML = col.map(p => `
+        <div class="kanban-card">
+          <div class="kanban-card-title">${p.navn}</div>
+          <div class="kanban-card-sub">${p.kunde || 'Ukjent kunde'}</div>
+          <div class="kanban-card-meta">
+            <span style="font-size:0.72rem;color:var(--muted)">${p.ansvarlig}</span>
+          </div>
+        </div>`).join('');
+    }
+  });
+}
+
+// FAKTURAER
+function leggTilFaktura() {
+  const nr = document.getElementById('fak-nr').value.trim();
+  const kunde = document.getElementById('fak-kunde').value.trim();
+  const desc = document.getElementById('fak-desc').value.trim();
+  const belop = parseInt(document.getElementById('fak-belop').value) || 0;
+  const forfall = document.getElementById('fak-forfall').value;
+  if (!nr || !kunde) return;
+  fakturaer.push({ nr, kunde, desc, belop, forfall, betalt: false });
+  oppdaterFakturaTabell();
+  oppdaterDashboard();
+  closeAllModals();
+}
+function toggleBetalt(i) {
+  fakturaer[i].betalt = !fakturaer[i].betalt;
+  oppdaterFakturaTabell();
+  oppdaterDashboard();
+}
+function oppdaterFakturaTabell() {
+  const t = document.getElementById('faktura-tabell');
+  if (fakturaer.length === 0) {
+    t.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Ingen fakturaer enda</td></tr>';
+    return;
+  }
+  t.innerHTML = fakturaer.map((f, i) => `
+    <tr>
+      <td style="font-weight:600">${f.nr}</td>
+      <td>${f.kunde}</td>
+      <td style="color:var(--muted)">${f.desc}</td>
+      <td style="font-weight:600">${f.belop.toLocaleString('no-NO')} kr</td>
+      <td>${f.forfall ? new Date(f.forfall).toLocaleDateString('no-NO') : '—'}</td>
+      <td>
+        <span class="badge ${f.betalt ? 'badge-green' : 'badge-yellow'}" style="cursor:pointer" onclick="toggleBetalt(${i})">
+          <span class="badge-dot"></span>${f.betalt ? 'Betalt' : 'Venter'}
+        </span>
+      </td>
+    </tr>`).join('');
+
+  const totalt = fakturaer.reduce((s, f) => s + f.belop, 0);
+  const betalt = fakturaer.filter(f => f.betalt).reduce((s, f) => s + f.belop, 0);
+  document.getElementById('f-totalt').textContent = totalt.toLocaleString('no-NO') + ' kr';
+  document.getElementById('f-betalt').textContent = betalt.toLocaleString('no-NO') + ' kr';
+  document.getElementById('f-utestaaende').textContent = (totalt - betalt).toLocaleString('no-NO') + ' kr';
+}
+
+// LEADS
+function leggTilLead() {
+  const bedrift = document.getElementById('l-bedrift').value.trim();
+  if (!bedrift) return;
+  const kontakt = document.getElementById('l-kontakt').value.trim();
+  const ansvarlig = document.getElementById('l-ansvarlig').value;
+  const status = document.getElementById('l-status').value;
+  const notat = document.getElementById('l-notat').value.trim();
+  leads.push({ bedrift, kontakt, ansvarlig, status, notat });
+  oppdaterLeadTabell();
+  closeAllModals();
+  document.getElementById('l-bedrift').value = '';
+  document.getElementById('l-kontakt').value = '';
+  document.getElementById('l-notat').value = '';
+}
+function oppdaterLeadTabell() {
+  const t = document.getElementById('lead-tabell');
+  if (leads.length === 0) {
+    t.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px">Ingen leads enda</td></tr>';
+    return;
+  }
+  const farger = { 'Ikke kontaktet': 'badge-yellow', 'Kontaktet': 'badge-purple', 'Motet': 'badge-purple', 'Tilbud sendt': 'badge-yellow', 'Vunnet': 'badge-green', 'Tapt': 'badge-red' };
+  t.innerHTML = leads.map(l => `
+    <tr>
+      <td><strong>${l.bedrift}</strong></td>
+      <td>${l.kontakt || '—'}</td>
+      <td>${l.ansvarlig}</td>
+      <td><span class="badge ${farger[l.status] || 'badge-yellow'}"><span class="badge-dot"></span>${l.status}</span></td>
+      <td style="color:var(--muted);font-size:0.82rem">${l.notat || '—'}</td>
+    </tr>`).join('');
+}
+
+// DASHBOARD
+function oppdaterDashboard() {
+  document.getElementById('stat-kunder').textContent = kunder.length;
+  const vedlikehold = kunder.reduce((s, k) => s + k.vedlikehold, 0);
+  document.getElementById('stat-vedlikehold').textContent = vedlikehold.toLocaleString('no-NO') + ' kr';
+  const ubetalt = fakturaer.filter(f => !f.betalt).length;
+  document.getElementById('stat-ubetalt').textContent = ubetalt;
+  const aktiveProsjekter = prosjekter.filter(p => p.status === 1).length;
+  document.getElementById('stat-prosjekter').textContent = aktiveProsjekter;
+}
+
+function toggleSelect(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.custom-select').forEach(s => s.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+function selectOption(wrapId, label, value) {
+  const wrap = document.getElementById(wrapId);
+  wrap.querySelector('.cs-selected').innerHTML = label + ' <span class="cs-arrow">&#8964;</span>';
+  wrap.querySelectorAll('.cs-option').forEach(o => o.classList.remove('active'));
+  event.target.classList.add('active');
+  const hidden = wrap.querySelector('input[type=hidden]');
+  if (hidden) hidden.value = value !== undefined ? value : label;
+  wrap.classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.custom-select')) {
+    document.querySelectorAll('.custom-select').forEach(s => s.classList.remove('open'));
+  }
+});
+</script>
+
+</body>
+</html>
